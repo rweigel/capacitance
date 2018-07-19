@@ -1,0 +1,5 @@
+all: pushcode.c
+	gcc -O3 pushcode.c -lm -o pushcode
+
+omp: pushcode_omp.c
+	gcc -fopenmp -O3 pushcode_omp.c -lm -o pushcode_omp		
