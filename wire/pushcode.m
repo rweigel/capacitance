@@ -54,14 +54,14 @@ for n = no:dn:nf
             end
             if (1)
                 options = optimset('TolFun',1e-2,'TolX',1e-2,'MaxFunEvals',1000);
-                % Calculate 2-parameter model for n-1 particles.
+                % Calculate 2-parameter model for n-dn particles.
                 po = fminsearch(@(p) pushcode_err(p,n-dn),po,options);
                 [Fss,xz] = pushcode_err(po,n-dn);
                 %Fss
                 %p'
 
                 % Difference between last calculated and 2-parameter model
-                % for n-1 particles.
+                % for n-dn particles.
                 lx = X{n-dn}-xz;
 
                 % Interpolate model error on to n point grid.

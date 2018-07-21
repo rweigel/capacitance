@@ -9,7 +9,9 @@ clear
 alpha = 0.95;
 k = 1;
 %for N = 10:100:10000;
-No = 2.^[3:18];
+%No = 2.^[3:18];
+No = [4:2:100];
+%No = 4;
 for i = 1:length(No);
     N = No(i);    
     if (0) % Set spacing to decrease near ends.
@@ -31,15 +33,15 @@ for i = 1:length(No);
         end
     else
         % Linear spacing
-        x = linspace(-0.5,0.5,N);
+        x = linspace(-1,1,N);
     end
 
     Z = zeros(N);
     tic
     for i = 1:N
-        if i > 13 && mod(i,100) == 0
-           fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b',i,N);
-           fprintf('%d/%d',i,N);
+        if i > 100 && mod(i,100) == 0
+           %fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');
+           %fprintf('%d/%d',i,N);
         end
         for j = 1:N
             if (i ~= j)
@@ -48,7 +50,7 @@ for i = 1:length(No);
             end
         end
     end
-    fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b',i,N);
+    %fprintf('\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b\b');
 
     b = [zeros(size(Z,1),1);1]; % Total charge
     Z(end+1,:) = ones(1,size(Z,2));
@@ -62,24 +64,21 @@ for i = 1:length(No);
     F1 = l(end);
     l1 = l(1:end-1);
 
-    L{k} = l1;
-    R1(k) = l1(1)/l1(end/2);
-    save FixedPosition.mat L R1
-    
-    if (0)
-    tic
-    [u,s,v] = svd(Z);
-    l2 = v(1:end-1,end);
-    R2(k) = l2(1)/l2(end/2);
-
-    F2 = l2(end,end);
-    t2 = toc;
-    end
-    fprintf('N = %d; R1 = %.2f; t0 = %.1e; t1 = %.1e;\n',N,R1(k),t0,t1);
-    %fprintf('N = %d; R1 = %.2f; R2 = %.2f; t1 = %.1e; t2 = %.1e\n',N,R1(k),R2(k),t1,t2);
+    Lambda{k} = l1;
+    TimeMatrix(1) = t0;
+    Time(1) = t1;
+    save ./mat/FixedPosition.mat Lambda Time TimeMatrix
+        
+    fprintf('N = %d; t0 = %.1e; t1 = %.1e;\n',N,t0,t1);
     k = k+1;
+    
+    figure(1);clf;grid on;hold on;
+        plot(x,l1*N/2,'.','MarkerSize',20);
+        drawnow;
+
 end
 
+break
 
 figure(1);clf;grid on;hold on;
     %plot(x,l1,'LineWidth',2);
@@ -92,4 +91,4 @@ figure(1);clf;grid on;hold on;
     box on;
     legend(sprintf('\\lambda''_1; q''_1=%.2g',sum(l1)));%,...
         %sprintf('\\lambda''_2; q''_1=%.2g',sum(l2)));
-saveplots('./figures/Capacitance_Force_Method_Density');
+%saveplots('./figures/Capacitance_Force_Method_Density');

@@ -1,25 +1,34 @@
 clear;
-load pushcode_3495.mat
-%load pushcodec.mat
-clear P
-%atan(sin(x)/(1+e^(-0.2*x)-cos(x)))
+load mat/pushcode_3495.mat
+
+%load mat/pushcodec.mat
+%X = DataC.X;
 
 k = 1;
-for i = 10:length(X)
+figure(1);clf;
+for i = 100:length(X)
     if ~isempty(X{i})
         d     = diff(X{i});
         d1(k) = d(1);
-        m = ceil(length(d)/2);
+        m     = ceil(length(d)/2);
         dm(k) = d(m);
         R(k) = dm(k)/d1(k);
         N(k) = i;
         Y{k} = X{i};
+        %atan(sin(x)/(1+e^(-0.2*x)-cos(x)))
         %hold on;
-        %plot(linspace(-1,1,length(d)),N(k)*d);drawnow
+        %I = find(X{i} < -0.99);
+        I = find(X{i} < -1+dm(k)*2);
+        f(k) = length(I)/N(k);
+        %f(k) = d(m)/d(m-1);
+        
+        %loglog(N(k),sum(d(1:end/10)),'MarkerSize',30);drawnow;hold on;
         k = k+1;
     end
 end
-
+semilogx(N,f);grid on;
+title(f(end));
+break
 No = 7;
 x = log10(N(1:end-1));
 y = log10(diff(R));
@@ -29,8 +38,8 @@ dsi = polyval(P,log10(Ni));
 
 del = (-1-P(1));
 Rinf = (10^P(2)/del)*(1/No^del);
-
-if (1)
+break
+if (0)
 figure(2);clf;hold on;
     plot(log10(N),log(d1),'r.','LineWidth',3);grid on;
     plot(log10(N),log(dm),'g.','LineWidth',3);grid on;
@@ -39,13 +48,14 @@ figure(2);clf;hold on;
     legend('\Delta_{end}','\Delta_{mid}','R\equiv\Delta_{mid}/\Delta_{end}','Location','SouthWest');
 end
 
-if (0)
+if (1)
 figure(2);clf;hold on;
-    plot(log10(N),1./(N.*d1),'r','LineWidth',3);grid on;
-    plot(log10(N),1./(N.*dm),'g','LineWidth',3);
-    plot(log10(N),dm./d1,'b','LineWidth',3);
+    plot(log10(N),1./(N.*d1),'r.','MarkerSize',20);grid on;
+    plot(log10(N),1./(N.*dm),'g.','MarkerSize',20);
+    %plot(log10(N),dm./d1,'b','LineWidth',3);
     xlabel('log_{10}(N)');
-    legend('\lambda_{end}','\lambda_{mid}','R\equiv\lambda_{end}/\lambda_{mid}','Location','NorthWest');
+    legend('\lambda_{end}','\lambda_{mid}','Location','NorthWest');
+    %legend('\lambda_{end}','\lambda_{mid}','R\equiv\lambda_{end}/\lambda_{mid}','Location','NorthWest');
 end
 
 figure(3);clf;hold on;

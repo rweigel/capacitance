@@ -1,22 +1,22 @@
 clear
-load FixedPosition.mat
+load mat/FixedPosition_100.mat
 
-for k = 1:length(L)
-    N(k) = length(L{k});
-    L1(k) = L{k}(1);
-    Lm(k) = L{k}(end/2);
+for k = 1:length(Lambda)
+    N(k) = length(Lambda{k});
+    L1(k) = Lambda{k}(1);
+    Lm(k) = Lambda{k}(end/2);
 end
-
-figure(1);clf;grid on;
-    semilogx(N,L1.*N,'b.','MarkerSize',20);
-    hold on;grid on;
-    semilogx(N,Lm.*N,'g.','MarkerSize',20);
-    legend('\lambda_{end}/\lambda_{mid}','\lambda_{end}/\lambda_{mid} Bonifirm','Location','NorthWest');
-    xlabel('N');
 
 l0 = 0.5-0.152./log(N)-0.123./(log(N)).^2;
 l1 = ( 0.0719+0.912./log(N)-0.874./(log(N)).^2 ).*log(N);
-    
+
+figure(1);clf;grid on;
+    semilogx(N,L1.*N/2,'b.','MarkerSize',20);
+    hold on;grid on;
+    semilogx(N,l1,'g.','MarkerSize',20);
+    legend('\lambda_{end}','\lambda_{end} Bonifirm','Location','NorthWest');
+    xlabel('N');
+
 figure(2);clf;grid on;
     semilogx(N,L1./Lm,'k.','MarkerSize',30);
     hold on;
