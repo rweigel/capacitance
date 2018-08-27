@@ -1,5 +1,9 @@
 clear;
 
+set(0,'DefaultFigureWindowStyle','docked')
+
+xx = -0.99;
+
 %Data = load('mat/FixedPosition_100.mat');
 %Lambda = Data.Lambda;
 
@@ -11,13 +15,23 @@ for k = 1:length(Lambda)
     % Lambda{k} is really charge on each patch. Total charge is always 1,
     % length of interval is 2.
     % Lambda = q_i/dx = q_i/ (2/Nfp);
-    Lfp{k}   = Lambda{k}*Nfp(k)/2;
+    Lfp{k}   = Lambda{k}*Nfp(k)/2;  
+    
+    Xfp{k}   = linspace(-1,1,Nfp(k));
+    xdfp(k)  = Xfp{k}(find(Lfp{k}<=0.5,1));
+    
     Nfp_a(k) = length(find(Lfp{k}>0.5));
     Nfp_b(k) = length(find(Lfp{k}<=0.5));
     Ffp_a(k) = Nfp_a(k)/Nfp(k); % Fraction above
     Ffp_b(k) = Nfp_b(k)/Nfp(k); % Fraction below
     Afp_a(k) = (1/2)*sum(Lfp{k}(Lfp{k}>0.5))/Nfp_a(k); % Area above
     Afp_b(k) = (1/2)*sum(Lfp{k}(Lfp{k}<=0.5))/Nfp_b(k); % Area above
+
+    I = find(Xfp{k}>xx);
+    %FFfp(k) = Lfp{k}(I(1));
+    Ix = -1+ceil(sqrt(Nfp(k)));
+    FFfp(k) = mean(Lambda{k}(Ix))*Nfp(k)/2;
+
     L1fp(k) = Lambda{k}(1)*Nfp(k)/2;
     D1fp(k) = (1./Nfp(k)).*(2/Nfp(k))./Lambda{k}(1); % dx = dq/lambda
     L2fp(k) = Lambda{k}(2)*Nfp(k)/2;
@@ -41,16 +55,36 @@ for i = 10:length(X)
         Xfc{k} = X{i};
         d      = diff(X{i});
         Nfc(k) = i;
+
+        ds     = d*(Nfc(k));
+        xd     = ds/2+Xfc{k}(1:end-1); % Center point between each charge.
+        dave(k) = 2.0;
+        xdfc(k) = Xfc{k}(find(ds>dave(k),1)); % First location where delta <= dave.
+        Nfc_a(k) = length(find(ds>dave(k)));
+        Nfc_b(k) = length(find(ds<=dave(k)));
+        Ffc_a(k) = Nfc_a(k)/Nfc(k); % Fraction above
+        Ffc_b(k) = Nfc_b(k)/Nfc(k); % Fraction below
+        Afc_a(k) = (1/2)*sum(ds(ds>dave(k)))/Nfc_a(k); % Area above
+        Afc_b(k) = (1/2)*sum(ds(ds<=dave(k)))/Nfc_b(k); % Area above
+
+        %I = find(Xfc{k}<=-0.99);
+        I = find(Xfc{k}>xx);
+        FFfc(k) = 1./(Nfc(k)*mean( d(1:-1+ceil(0.5*sqrt(Nfc(k))) )));
+        
         % Assume total charge is 1.
         % Lamda = dq/dx = (1/N)/(x_{i+1}-x_{i})
         Lfc{k}   = 1./(Nfc(k)*d);
-        xfc(k)   = X{i}(find(Lfc{k}<=0.5,1)); % First location where Lambda <= 0.5.
-        Nfc_a(k) = length(find(Lfc{k}>0.5));
-        Nfc_b(k) = length(find(Lfc{k}<=0.5));
-        Ffc_a(k) = Nfc_a(k)/Nfc(k); % Fraction above
-        Ffc_b(k) = Nfc_b(k)/Nfc(k); % Fraction below
-        Afc_a(k) = (1/2)*sum(Lfc{k}(Lfc{k}>0.5))/Nfc_a(k); % Area above
-        Afc_b(k) = (1/2)*sum(Lfc{k}(Lfc{k}<=0.5))/Nfc_b(k); % Area above
+        if (0)
+            Lave(k)  = mean(Lfc{k});
+            Lc       = 0.5;
+            xfc(k)   = X{i}(find(Lfc{k}<=Lc,1)); % First location where Lambda <= 0.5.
+            Nfc_a(k) = length(find(Lfc{k}>Lc));
+            Nfc_b(k) = length(find(Lfc{k}<=Lc));
+            Ffc_a(k) = Nfc_a(k)/Nfc(k); % Fraction above
+            Ffc_b(k) = Nfc_b(k)/Nfc(k); % Fraction below
+            Afc_a(k) = (1/2)*sum(Lfc{k}(Lfc{k}>Lc))/Nfc_a(k); % Area above
+            Afc_b(k) = (1/2)*sum(Lfc{k}(Lfc{k}<=Lc))/Nfc_b(k); % Area above
+        end
         L1fc(k) = 1./(Nfc(k)*d(1));
         D1fc(k) = d(1);
         L2fc(k) = 1./(Nfc(k)*d(2));
@@ -80,8 +114,12 @@ fn=fn+1;figure(fn);clf;grid on;hold on;
     legend off
     title(Is);
     xlabel('x');
-    set(gca,'xlim',[-1.02,1.02])
+    set(gca,'xlim',[-1.02,0.02])
     ylabel('$\lambda$ (Fixed Charge)');
+    %z = 0.01;
+    %x = [-1+z:z:1-z];
+    %y = 1./sqrt(1-(x).^2);
+    %plot(x,y-min(y)+0.45,'k','LineWidth',2);
     setfonts
 
 fn=fn+1;figure(fn);clf;grid on;hold on;
@@ -97,17 +135,31 @@ fn=fn+1;figure(fn);clf;grid on;hold on;
     set(gca,'xlim',[-1.001,-0.99])
     ylabel('$\lambda$ (Fixed Charge)');
     setfonts
- 
+
 fn=fn+1;figure(fn);clf;grid on;hold on;
     for i = I
-        d = diff(Xfc{i});
-        x = d(1)/2+Xfc{i}(1:end-1); % Center point between each charge.
-        plot(x,d);
+        d = Lfc{i};
+        dx = diff(Xfc{i});
+        x = dx/2+Xfc{i}(1:end-1); % Center point between each charge.
+        plot(x,d,'Marker','.','LineStyle','-');
     end
     legend off
     title(Is);
     xlabel('x');
-    set(gca,'xlim',[-1.02,1.02])
+    set(gca,'xlim',[-0.95,-0.55])
+    ylabel('$\lambda$ (Fixed Charge)');
+    setfonts    
+    
+fn=fn+1;figure(fn);clf;grid on;hold on;
+    for i = I
+        d = diff(Xfc{i});
+        x = d(1)/2+Xfc{i}(1:end-1); % Center point between each charge.
+        plot(x,d*length(Xfc{i}));
+    end
+    legend off
+    title(Is);
+    xlabel('x');
+    set(gca,'xlim',[-1.02,0.02])
     ylabel('$\Delta$ (Fixed Charge)');
     setfonts
 
@@ -123,7 +175,7 @@ fn=fn+1;figure(fn);clf;grid on;hold on;
     set(gca,'xlim',[-1.001,-0.99])
     ylabel('$\Delta$ (Fixed Charge)');
     setfonts
-
+    
 fn=fn+1;figure(fn);clf;
     semilogx(Nfc,D1fc,'k.','MarkerSize',20);
     hold on;grid on;
@@ -234,29 +286,82 @@ fn=fn+1;figure(fn);clf;
     setfonts
 
 fn=fn+1;figure(fn);clf;
+    semilogx(Nfc,xdfc,'.','MarkerSize',20);
+    grid on;hold on;
+    semilogx(Nfp,xdfp,'.','MarkerSize',20);
+    legend('$x_{i}$ when $\Delta_{i-1} > 2$ and $\Delta_{i} \le 2$ (Fixed Charge)','$x_{i}$ when $\lambda_{i-1} > 0.5$ and $\lambda_{i} \le 0.5$ (Fixed Position)');
+    ylabel('$x_c$');
+    set(gca,'ylim',[-1,-0.6])
+    xlabel('N');
+    setfonts
+    
+fn=fn+1;figure(fn);clf;
+    loglog(Nfc,xdfc,'.','MarkerSize',20);
+    grid on;hold on;
+    loglog(Nfp,xdfp,'.','MarkerSize',20);
+    legend('$x_{i}$ when $\Delta_{i-1} > 2$ and $\Delta_{i} \le 2$ (Fixed Charge)','$x_{i}$ when $\lambda_{i-1} > 0.5$ and $\lambda_{i} \le 0.5$ (Fixed Position)');
+    ylabel('$x_c$');
+    set(gca,'ylim',[-1,-0.6])
+    xlabel('N');
+    setfonts
+    
+if (0)    
+    p = polyfit(log10(Nfc(1000:end-1)),log10(-diff(xdfc(1000:end))),1)
+    p = polyfit(log10(Nfc(100:1000-1)),log10(-diff(xdfc(100:1000))),1)
+
+    y = polyval(p,log10(Nfc(100:end)));
+    fn=fn+1;figure(fn);clf;
+        loglog(Nfc(100:end),-10.^y,'b','LineWidth',5);
+        grid on;hold on;
+        loglog(Nfc(1:end-1),diff(xdfc),'g.','MarkerSize',3);
+        legend('Fit for N=100+','diff($\Delta$)','Location','NorthWest');
+        xlabel('N');
+        setfonts
+end
+    
+fn=fn+1;figure(fn);clf;
+    semilogx(Nfp,Afp_a,'r.','MarkerSize',20);
+    hold on;grid on;
+    semilogx(Nfp,Afp_b,'r.','MarkerSize',5);
+    legend('$A > x_c$ (Fixed Position)','$A \le x_c$ (Fixed Position)','Location','NorthWest');
+    xlabel('N');
+    setfonts
+    
+fn=fn+1;figure(fn);clf;
+    semilogx(Nfc,Afc_a,'k.','MarkerSize',20);
+    hold on;grid on;
+    semilogx(Nfc,Afc_b,'k.','MarkerSize',5);
+    legend('$A > x_c$ (Fixed Charge)','$A \le x_c$ (Fixed Charge)','Location','NorthEast');
+    xlabel('N');
+    setfonts
+ 
+fn=fn+1;figure(fn);clf;
     semilogx(Nfc,Ffc_a,'k.','MarkerSize',20);
     hold on;grid on;
     semilogx(Nfc,Ffc_b,'k.','MarkerSize',5);
     semilogx(Nfp,Ffp_a,'r.','MarkerSize',20);
     semilogx(Nfp,Ffp_b,'r.','MarkerSize',5);
-    legend('% $> 0.5$ (Fixed Charge)','% $\le 0.5$ (Fixed Charge)','% $> 0.5$ (Fixed Position)','% $\le 0.5$ (Fixed Position)','Location','NorthWest');
-    xlabel('N');
-    setfonts
-    
-fn=fn+1;figure(fn);clf;
-    semilogx(Nfc,2*Afc_a,'k.','MarkerSize',20);
-    hold on;grid on;
-    semilogx(Nfc,2*Afc_b,'k.','MarkerSize',5);
-    semilogx(Nfp,2*Afp_a,'r.','MarkerSize',20);
-    semilogx(Nfp,2*Afp_b,'r.','MarkerSize',5);
-    legend('$A > 0.5$ (Fixed Charge)','$A \le 0.5$ (Fixed Charge)','$A > 0.5$ (Fixed Position)','$A \le 0.5$ (Fixed Position)','Location','NorthWest');
+    legend('Fraction $> x_c$ (Fixed Charge)','Fraction $\le x_c$ (Fixed Charge)','Fraction $> x_c$ (Fixed Position)','Fraction $\le x_c$ (Fixed Position)','Location','NorthWest');
     xlabel('N');
     setfonts
 
 fn=fn+1;figure(fn);clf;
-    semilogx(Nfc,xfc,'.','MarkerSize',20);
+    semilogx(Nfc,FFfc,'.','MarkerSize',10);
     grid on;hold on;
-    title('$x_{i}$ when $\lambda_{i-1} > 0.5$ and $\lambda_{i} \le 0.5$');
+    semilogx(Nfp,FFfp,'.','MarkerSize',15)
+    set(gca,'ylim',[0,0.14])
+    legend('Fixed Charge','Fixed Position');
+    title(sprintf('Fraction charges with x < %.2f',xx));
+    xlabel('N');
+
+fn=fn+1;figure(fn);clf;
+    loglog(Nfc,FFfc,'.','MarkerSize',10);
+    grid on;hold on;
+    loglog(Nfp,FFfp,'.','MarkerSize',15)
+    %set(gca,'ylim',[0,0.14])
+    legend('Fixed Charge','Fixed Position');
+    %ylabel('N\Delta_0')
+    title(sprintf('$\\lambda\\simeq$ %.2f',xx));
     xlabel('N');
     setfonts
     

@@ -67,6 +67,21 @@ plot(diff(d1),'LineWidth',2);hold on;
 break
 
 
+xfce1 = Xfc{end};
+n = floor(length(xfce1)/2);
+for k = n:length(xfce1),F1(k-n+1) = 1/(xfce1(n-1)-xfce1(k))^2;end
+xfce2 = Xfc{end-10};
+for k = 3:length(xfce2),F2(k-2) = 1/(xfce2(n-1)-xfce2(k))^2;end
+
+clf
+loglog(F1);
+hold on;
+break
+loglog(F2);
+grid on;
+%loglog(F1(1:length(F2))./F2)
+break
+
 for i = 1:size(L,2),L(:,i) = L(:,i)/max(L(:,i));,end
 
 clf
